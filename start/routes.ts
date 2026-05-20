@@ -11,8 +11,8 @@ import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 //import { controllers } from '#generated/controllers'
 
-const AuthController = () => ('#controllers/auth_controller')
-const Bookscontrollers = () => ('#controllers/books_controller')
+const AuthController = () => import('#controllers/auth_controller')
+const Bookscontrollers = () => import('#controllers/books_controller')
 
 router.post('register', [AuthController, 'register'])
 router.post('login', [AuthController, 'login'])
@@ -32,4 +32,4 @@ router
     router.put('/books/:id', [Bookscontrollers, 'update'])
     router.delete('/books/:id', [Bookscontrollers, 'destroy'])
     })
-  .use(middleware.auth.auth({ guards: ['api']}))
+  .use(middleware.auth({ guards: ['api'] })) 

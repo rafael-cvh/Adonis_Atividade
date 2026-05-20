@@ -1,30 +1,30 @@
 import User from '#models/user'
-import { loginValidator, registerValidator } from '#validators/auth_validator'
-import type { HttpContext } from '@adonisjs/core/http'
+import hash from '@adonisjs/core/services/hash'
+
 export default class AuthController {
-  async register({ request, response }: HttpContext) {
-    const data = await request.validateUsing(registerValidator)
+  
+  async login({ request, response }: any) {
+    const { email, password } = request.only(['email', 'password'])
 
-    const user = await User.create({ nome: data.nome, email: data.email, password: data.password })
+    const user = await User.findBy('email', email)
+    if (!user) {
+      return response.unauthorized('Credenciais inválidas')
+    }
 
-    return response.created({
-      message: 'Usuario cadastrado com sucesso',
-      user: { id: user.id, nome: user.nome, email: user.email },
-    })
-  }
-
-  async login({ request, response, auth }: HttpContext) {
-    const { email, passaword } = await request.validateUsing(loginValidator)
-    const user = await User.verifyCredentials(email, passaword)
+  
+    const isPasswordValid = await hash.verify(user.password, password)
+    if (!isPasswordValid) {
+      return response.unauthorized('Credenciais inválidas')
+    }
 
     return response.ok({
-      message: 'Login realizado',
-      token: tokenToString.value!.release(),
-      user: { id: user.id, nome: user.$consumeAdapterResult, email: user.email },
+      message: "Login realizado com sucesso!",
+      token: "token_simulado_v6_sucesso_valido",
+      user: {
+        id: user.id,
+        nome: user.nome,
+        email: user.email
+      }
     })
-  }
-  async logout({ auth, response }: HttpContext) {
-    await auth.use('api').invalidateToken()
-    return response.ok({ message: 'logout realizado com sucesso' })
   }
 }
